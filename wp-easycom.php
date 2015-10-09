@@ -3,10 +3,10 @@ header( 'content-type: text/html; charset=utf-8' );
 /**
  * @package EasyCom SEO
  * @version 1.2
- * @Plugin URI: http://
- * @Description: SEO Tools to easily comments articles on wordpress
- * @Author: @Jcchemin
- * @Sample: /wp-easycom.php?key=g3j7H7g959DJBNxh&article_url=&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
+ * @plugin URI: http://
+ * @description: SEO Tools to easily comments articles on wordpress
+ * @author: @Jcchemin
+ * @sample: /wp-easycom.php?key=g3j7H7g959DJBNxh&article_url=&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
  */
 
 $token = array('g3j7H7g959DJBNxh', 'uChj2U33R7krU85H');
