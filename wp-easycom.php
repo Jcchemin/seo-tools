@@ -38,7 +38,7 @@ $comment = !empty($_GET['comment'])?$db->quote($_GET['comment']):die('comment mi
 $id_post = get_pageid($db, $table_prefix, $article_url);
 
 $sql = "INSERT INTO `".$table_prefix."comments` (`comment_post_ID`, `comment_author`, `comment_author_email`, `comment_author_url`, `comment_author_IP`, `comment_date`, `comment_date_gmt`, `comment_content`, `comment_karma`, `comment_approved`, `comment_agent`, `comment_type`, `comment_parent`, `user_id`) 
-VALUES ('$id_post', '$author_name', 'contact@wp-easycom.fr', '$link_url', '127.0.0.1', NOW(), NOW(), '$comment', '0', '1', '', '', '0', '0');";
+VALUES ('$id_post', $author_name, 'contact@wp-easycom.fr', $link_url, '127.0.0.1', NOW(), NOW(), $comment, '0', '1', '', '', '0', '0');";
 $query = $db->prepare($sql);
 $query->execute();
 echo $db->lastInsertId();
