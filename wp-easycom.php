@@ -2,11 +2,16 @@
 header( 'content-type: text/html; charset=utf-8' );
 /**
  * @package EasyCom SEO
- * @version 1.2
+ * @version 1.3
  * @plugin URI: http://
  * @description: SEO Tools to easily comments articles on wordpress
  * @author: @Jcchemin
- * @sample: /wp-easycom.php?key=g3j7H7g959DJBNxh&article_url=&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
+ * 
+ *  type = "comment" or "post"
+ * 
+ * @sample comment: /wp-easycom.php?key=g3j7H7g959DJBNxh&article_url=&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
+ * @sample post: /wp-easycom.php?key=g3j7H7g959DJBNxh
+ * 
  */
 
 $token = array('g3j7H7g959DJBNxh', 'uChj2U33R7krU85H');
@@ -30,15 +35,21 @@ try {
 
 $key = !empty($_GET['key'])?$db->quote($_GET['key']):die('key missing');
 check_access($token, $key);
+$type = !empty($_GET['type'])?$db->quote($_GET['type']):'comment');
+
 $article_url = !empty($_GET['article_url'])?$db->quote($_GET['article_url']):die('article_url missing');
-$link_url = !empty($_GET['link_url'])?$db->quote($_GET['link_url']):die('link_url missing');
-$author_name = !empty($_GET['author_name'])?$db->quote($_GET['author_name']):die('author_name missing');
 $comment = !empty($_GET['comment'])?$db->quote($_GET['comment']):die('comment missing');
 
 $id_post = get_pageid($db, $table_prefix, $article_url);
 
-$sql = "INSERT INTO `".$table_prefix."comments` (`comment_post_ID`, `comment_author`, `comment_author_email`, `comment_author_url`, `comment_author_IP`, `comment_date`, `comment_date_gmt`, `comment_content`, `comment_karma`, `comment_approved`, `comment_agent`, `comment_type`, `comment_parent`, `user_id`) 
-VALUES ($id_post, $author_name, 'contact@wp-easycom.fr', $link_url, '127.0.0.1', NOW(), NOW(), $comment, '0', '1', '', '', '0', '0');";
+if ($type == "comment"){
+	$link_url = !empty($_GET['link_url'])?$db->quote($_GET['link_url']):die('link_url missing');
+	$author_name = !empty($_GET['author_name'])?$db->quote($_GET['author_name']):die('author_name missing');
+	$sql = "INSERT INTO `".$table_prefix."comments` (`comment_post_ID`, `comment_author`, `comment_author_email`, `comment_author_url`, `comment_author_IP`, `comment_date`, `comment_date_gmt`, `comment_content`, `comment_karma`, `comment_approved`, `comment_agent`, `comment_type`, `comment_parent`, `user_id`) VALUES ($id_post, $author_name, 'contact@wp-easycom.fr', $link_url, '127.0.0.1', NOW(), NOW(), $comment, '0', '1', '', '', '0', '0');";
+}else if ($type == "post"){
+	$sql = "UPDATE `".$table_prefix."comments` SET `post_content` = CONCAT(`post_content`, $comment) WHERE `ID` = ".$id_post;
+}else{die('type error');}
+
 $query = $db->prepare($sql);
 $query->execute();
 echo $db->lastInsertId();
@@ -61,7 +72,7 @@ function get_pageid($db, $table_prefix, $article_url){
 	$url_exp = explode('/', $article_url);
 	for ($i = count($url_exp)-1; $i > 0; $i--){
 		if (!empty($url_exp[$i])){
-			$sql = "SELECT `ID` FROM `".$table_prefix."posts` WHERE `post_name` LIKE '".$url_exp[$i]."' LIMIT 1";
+			$sql = "SELECT `ID` FROM `".$table_prefix."posts` WHERE `post_name` LIKE '".$url_exp[$i]."' AND `post_type` = 'post' LIMIT 1";
 			$query = $db->prepare($sql);
 			$query->execute();
 			if ($query->rowCount() > 0) {
