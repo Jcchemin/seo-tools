@@ -9,8 +9,8 @@ header( 'content-type: text/html; charset=utf-8' );
  * 
  *  type = "comment" or "post"
  * 
- * @sample comment: /wp-easycom.php?key=g3j7H7g959DJBNxh&article_url=&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
- * @sample post: /wp-easycom.php?key=g3j7H7g959DJBNxh
+ * @sample comment: /wp-easycom.php?key=g3j7H7g959DJBNxh&type=comment&article_url=http://www.blog.com/post.html&link_url=https://www.ifitness.fr&author_name=Clara&comment=Super%20article%20merci%20bien
+ * @sample post: /wp-easycom.php?key=g3j7H7g959DJBNxh&type=post&article_url=http://www.blog.com/post.html&comment="Super%20article%20merci%20bien"
  * 
  */
 
@@ -33,9 +33,9 @@ try {
 	echo 'N° : '.$e->getCode();
 }
 
-$key = !empty($_GET['key'])?$db->quote($_GET['key']):die('key missing');
+$key = !empty($_GET['key'])?$_GET['key']:die('key missing');
 check_access($token, $key);
-$type = !empty($_GET['type'])?$db->quote($_GET['type']):'comment');
+$type = !empty($_GET['type'])?$_GET['type']:die('type missing');
 
 $article_url = !empty($_GET['article_url'])?$db->quote($_GET['article_url']):die('article_url missing');
 $comment = !empty($_GET['comment'])?$db->quote($_GET['comment']):die('comment missing');
@@ -47,12 +47,21 @@ if ($type == "comment"){
 	$author_name = !empty($_GET['author_name'])?$db->quote($_GET['author_name']):die('author_name missing');
 	$sql = "INSERT INTO `".$table_prefix."comments` (`comment_post_ID`, `comment_author`, `comment_author_email`, `comment_author_url`, `comment_author_IP`, `comment_date`, `comment_date_gmt`, `comment_content`, `comment_karma`, `comment_approved`, `comment_agent`, `comment_type`, `comment_parent`, `user_id`) VALUES ($id_post, $author_name, 'contact@wp-easycom.fr', $link_url, '127.0.0.1', NOW(), NOW(), $comment, '0', '1', '', '', '0', '0');";
 }else if ($type == "post"){
-	$sql = "UPDATE `".$table_prefix."comments` SET `post_content` = CONCAT(`post_content`, $comment) WHERE `ID` = ".$id_post;
-}else{die('type error');}
+	$sql = "UPDATE `".$table_prefix."posts` SET `post_content` = CONCAT(`post_content`, ".$comment.") WHERE `ID` = ".$id_post;
+}
 
 $query = $db->prepare($sql);
-$query->execute();
-echo $db->lastInsertId();
+if (!$query){
+	$query->errorInfo();
+}else{
+	$query->execute();
+}
+
+if ($type == "comment"){
+	echo $db->lastInsertId();
+}else if ($type == "post"){
+	echo $query->rowCount();
+}
 
 function check_access($token, $key){
 	foreach ($token as $t){
