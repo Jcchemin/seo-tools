@@ -5,6 +5,9 @@
  * @plugin URI: http://
  * @description: SEO Proxy to easily protect our wordpress with proxy filter
  * @author: @Jcchemin
+ *
+ * @purge cache with "?__nocache=true" parameter
+ *
  * Based on Rob Thomson work <rob@marotori.com>
  *
  * This program is free software; you can redistribute it and/or modify
